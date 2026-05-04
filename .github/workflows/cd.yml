@@ -1,0 +1,17 @@
+name: Continuous Deployment Deployment
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy-infrastructure:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+    - name: Terraform Init & Apply
+      run: |
+        cd terraform
+        echo "Mocking terraform infra build..."
