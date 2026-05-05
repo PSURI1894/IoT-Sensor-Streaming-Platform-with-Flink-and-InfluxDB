@@ -1,0 +1,18 @@
+{
+  "rules": [
+    {
+      "id": "rule_mqtt_to_kafka",
+      "sql": "SELECT payload.event_id as event_id, payload.asset_id as asset_id, payload.device_class as device_class, payload.metric_name as metric_name, payload.value as value, payload.event_ts as event_ts, payload.quality_flag as quality_flag FROM \"site/+/asset/+/+\"",
+      "actions": [
+        {
+          "name": "data_bridge_kafka",
+          "params": {
+            "topic": "telemetry.raw",
+            "key": "${asset_id}"
+          }
+        }
+      ],
+      "description": "Bridges MQTT telemetry events to Kafka main raw ingress"
+    }
+  ]
+}
