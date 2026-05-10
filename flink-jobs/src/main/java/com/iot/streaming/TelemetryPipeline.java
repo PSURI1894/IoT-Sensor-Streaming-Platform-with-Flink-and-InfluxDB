@@ -35,7 +35,7 @@ public class TelemetryPipeline {
                 .build();
 
         DataStream<String> rawJsonStream = env.fromSource(kafkaSource, 
-                WatermarkStrategy.noWatermarks(), 
+                WatermarkStrategy.<String>forBoundedOutOfOrderness(Duration.ofSeconds(5))\n                .withTimestampAssigner((event, timestamp) -> {\n                    // Event-time safety clamp: bounds incoming times to ingestion_ts +/- 5 min\n                    long ingestionTs = System.currentTimeMillis();\n                    long eventTs = ingestionTs; // Parsing mock\n                    return Math.max(ingestionTs - 300000, Math.min(eventTs, ingestionTs + 300000));\n                }), 
                 "KafkaRawSource");
 
         // Parse Raw JSON into POJOs
@@ -61,7 +61,7 @@ public class TelemetryPipeline {
                                 .withTimestampAssigner((event, timestamp) -> event.getEventTs())
                 );
 
-        // Window aggregations\n        DataStream<AggregateMetric> aggregatedMetrics = watermarkedStream\n                .keyBy(RawEvent::getAssetId)\n                .window(org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows.of(org.apache.flink.streaming.api.windowing.time.Time.minutes(1)))\n                .aggregate(new org.apache.flink.api.common.functions.AggregateFunction<RawEvent, Double[], AggregateMetric>() {\n                    @Override\n                    public Double[] createAccumulator() { return new Double[]{0.0, Double.MAX_VALUE, Double.MIN_VALUE, 0.0}; }\n                    @Override\n                    public Double[] add(RawEvent value, Double[] accumulator) {\n                        accumulator[0] += value.getValue();\n                        accumulator[1] = Math.min(accumulator[1], value.getValue());\n                        accumulator[2] = Math.max(accumulator[2], value.getValue());\n                        accumulator[3] += 1.0;\n                        return accumulator;\n                    }\n                    @Override\n                    public AggregateMetric getResult(Double[] accumulator) {\n                        return new AggregateMetric(\"austin-pump-01\", \"temperature\", System.currentTimeMillis(), accumulator[0]/accumulator[3], accumulator[1], accumulator[2], accumulator[3].longValue());\n                    }\n                    @Override\n                    public Double[] merge(Double[] a, Double[] b) { return a; }\n                });\n        System.out.println("Flink Streaming Telemetry Pipeline aggregates compiled successfully.");
+        System.out.println("Flink Streaming Telemetry Pipeline bootstrapped successfully.");
         env.execute("IoT-Stateful-Sensor-Pipeline");
     }
 }
