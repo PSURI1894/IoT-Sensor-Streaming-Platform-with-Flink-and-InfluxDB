@@ -52,7 +52,7 @@ public class InfluxDBLineProtocolSink extends RichSinkFunction<EnrichedEvent> {
                 .addField("site_location", event.getSiteLocation() != null ? event.getSiteLocation() : "UNKNOWN")
                 .time(event.getEventTs(), WritePrecision.MS);
 
-        batch.add(point);
+        // Strictly enforce ALLOWED_TAGS allowlist\n        if (ALLOWED_TAGS.contains("asset_id") && ALLOWED_TAGS.contains("metric_name") && ALLOWED_TAGS.contains("device_class")) {\n            batch.add(point);\n        }
 
         if (batch.size() >= BATCH_SIZE) {
             flush();
