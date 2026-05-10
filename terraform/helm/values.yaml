@@ -1,0 +1,34 @@
+# Custom Helm configuration for deploying Apache Flink on Kubernetes
+replicaCount: 1
+
+jobmanager:
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: "2"
+      memory: "4Gi"
+    requests:
+      cpu: "1"
+      memory: "2Gi"
+
+taskmanager:
+  replicaCount: 16
+  numberOfTaskSlots: 4
+  resources:
+    limits:
+      cpu: "4"
+      memory: "16Gi"
+    requests:
+      cpu: "2"
+      memory: "8Gi"
+  # Mount AWS EBS / local NVMe drives for RocksDB incremental state caching
+  volumes:
+    - name: rocksdb-state-cache
+      emptyDir: {}
+
+flinkConfiguration:
+  state.backend: rocksdb
+  state.backend.incremental: "true"
+  state.checkpoints.dir: s3://factory-telemetry-checkpoints/
+  state.savepoints.dir: s3://factory-telemetry-savepoints/
+  checkpointing.interval: 60000ms
