@@ -34,4 +34,4 @@ public class RawEvent implements Serializable {
     public Integer getQualityFlag() { return qualityFlag; }
     public void setQualityFlag(Integer qualityFlag) { this.qualityFlag = qualityFlag; }
 }
-// Version update 14\n
+// Version update 15\n
