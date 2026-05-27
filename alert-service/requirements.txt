@@ -1,0 +1,1 @@
+fastapi==0.95.0\naioredis==2.0.1\naiokafka==0.8.0\nuvicorn==0.21.1\n
